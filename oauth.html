@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Authorization callback — Tukim Tovim Publisher</title>
+<link rel="icon" href="assets/icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+  .code{
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:.95rem;
+    background:var(--ink-2); border:1px solid var(--line); border-radius:4px;
+    padding:1rem 1.1rem; word-break:break-all; user-select:all; color:#fff; margin:0 0 1rem;
+  }
+  .copy{
+    font:inherit; font-weight:600; cursor:pointer; color:var(--paper);
+    background:var(--rust); border:0; border-radius:4px; padding:.6rem 1.4rem;
+  }
+  .copy:hover{background:var(--alarm)}
+  .fail{border-color:var(--alarm)}
+  .muted{color:var(--paper-dim); font-size:.9rem}
+</style>
+</head>
+<body>
+<div class="wrap legal">
+  <a class="back" href="index.html">&larr; Tukim Tovim</a>
+  <h1>Authorization callback</h1>
+  <p class="updated">Tukim Tovim Publisher &mdash; internal use</p>
+
+  <div id="out"></div>
+
+  <h2>What this page is</h2>
+  <p>This is the OAuth redirect target for <strong>Tukim Tovim Publisher</strong>, the
+  private application we use to upload our own finished videos into the TikTok
+  Draft Inbox of <strong>@tukimtovim</strong>.</p>
+  <p>After the account owner authorizes the app, TikTok sends them back here with a
+  one-time authorization code. The code is shown above so it can be exchanged for an
+  access token. It is <strong>not transmitted anywhere from this page</strong> &mdash;
+  this is a static page with no server and no analytics, and the code stays in the
+  browser address bar.</p>
+  <p class="muted">The app is used only by the owner of @tukimtovim and is not offered
+  to third parties. See our <a href="privacy.html">privacy policy</a>.</p>
+</div>
+
+<script>
+(function () {
+  var q = new URLSearchParams(location.search);
+  var out = document.getElementById("out");
+
+  function block(title, body, bad) {
+    var h = document.createElement("h2"); h.textContent = title; h.style.marginTop = "0";
+    var p = document.createElement("p"); p.className = "code" + (bad ? " fail" : "");
+    p.textContent = body;
+    out.appendChild(h); out.appendChild(p);
+    return p;
+  }
+
+  var err = q.get("error") || q.get("error_code");
+  if (err) {
+    block("Authorization failed", err + (q.get("error_description") ? " — " + q.get("error_description") : ""), true);
+    return;
+  }
+
+  var code = q.get("code");
+  if (!code) {
+    var p = document.createElement("p");
+    p.className = "muted";
+    p.textContent = "No authorization code in this URL. Start the flow from the app.";
+    out.appendChild(p);
+    return;
+  }
+
+  var pre = block("Authorization code", code, false);
+  var st = q.get("state");
+  if (st) block("state", st, false);
+
+  var btn = document.createElement("button");
+  btn.className = "copy"; btn.type = "button"; btn.textContent = "Copy code";
+  btn.onclick = function () {
+    navigator.clipboard.writeText(code).then(
+      function () { btn.textContent = "Copied ✓"; },
+      function () { btn.textContent = "Select the code above and copy manually"; }
+    );
+  };
+  out.appendChild(btn);
+
+  var note = document.createElement("p");
+  note.className = "muted";
+  note.style.marginTop = "1rem";
+  note.textContent = "This code expires within minutes and can be exchanged only once.";
+  out.appendChild(note);
+})();
+</script>
+</body>
+</html>
