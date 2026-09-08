@@ -92,7 +92,8 @@
   }
 
   var sandbox = /^sb-/.test(q.get("state") || "");   // our auth command prefixes sandbox state
-  var cmd = "python3 tiktok_publisher.py token " + code + (sandbox ? " --sandbox" : "");
+  // single quotes: the code contains '!', which bash would treat as history expansion
+  var cmd = "python3 tiktok_publisher.py token '" + code + "'" + (sandbox ? " --sandbox" : "");
   block("Exchange it with", cmd, false);
 
   out.appendChild(copier("Copy code", code));
