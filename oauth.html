@@ -78,15 +78,25 @@
   var st = q.get("state");
   if (st) block("state", st, false);
 
-  var btn = document.createElement("button");
-  btn.className = "copy"; btn.type = "button"; btn.textContent = "Copy code";
-  btn.onclick = function () {
-    navigator.clipboard.writeText(code).then(
-      function () { btn.textContent = "Copied ✓"; },
-      function () { btn.textContent = "Select the code above and copy manually"; }
-    );
-  };
-  out.appendChild(btn);
+  function copier(label, text) {
+    var b = document.createElement("button");
+    b.className = "copy"; b.type = "button"; b.textContent = label;
+    b.style.marginInlineEnd = ".6rem";
+    b.onclick = function () {
+      navigator.clipboard.writeText(text).then(
+        function () { b.textContent = "Copied \u2713"; },
+        function () { b.textContent = "Select it above and copy manually"; }
+      );
+    };
+    return b;
+  }
+
+  var sandbox = /^sb-/.test(q.get("state") || "");   // our auth command prefixes sandbox state
+  var cmd = "python3 tiktok_publisher.py token " + code + (sandbox ? " --sandbox" : "");
+  block("Exchange it with", cmd, false);
+
+  out.appendChild(copier("Copy code", code));
+  out.appendChild(copier("Copy command", cmd));
 
   var note = document.createElement("p");
   note.className = "muted";
